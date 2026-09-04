@@ -1,4 +1,4 @@
-# XSS-Injection Scanner
+# XSS-Scanner 
 
 An advanced, automated **Cross-Site Scripting (XSS)** vulnerability scanner built with Python . It features automated link crawling, form discovery, GET/POST parameter extraction, and multi-vector payload injection to identify potential reflected and stored XSS vulnerabilities in web applications.
 
