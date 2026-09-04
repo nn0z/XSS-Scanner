@@ -473,39 +473,71 @@ class XSSInjectionCrawler:
 
             print(f"\n{COLORS['BLUE']}━━━ Testing Form: {url[:60]}{COLORS['RESET']}")
 
-            payloads_to_test = CRITICAL_XSS_PAYLOADS[:6] if not is_deep else CRITICAL_XSS_PAYLOADS
+            if is_deep:
+                payloads_to_test = CRITICAL_XSS_PAYLOADS
+                for input_key in test_data.keys():
+                    for payload, payload_name in payloads_to_test:
+                        modified_data = test_data.copy()
+                        modified_data[input_key] = f"{test_data[input_key]}{payload}"
+                        test_data_str = urllib.parse.urlencode(modified_data)
 
-            for payload, payload_name in payloads_to_test:
-                modified_data = test_data.copy()
-                first_key = list(test_data.keys())[0]
-                modified_data[first_key] = f"{test_data[first_key]}{payload}"
-                test_data_str = urllib.parse.urlencode(modified_data)
+                        print(f"{COLORS['GRAY']}   Testing: {COLORS['YELLOW']}{payload_name}{COLORS['RESET']} on {COLORS['MAGENTA']}{input_key}{COLORS['RESET']}", end=" ", flush=True)
 
-                print(f"{COLORS['GRAY']}   Testing: {COLORS['YELLOW']}{payload_name}{COLORS['RESET']}", end=" ",
-                      flush=True)
+                        test_response = self.get_response_fast(url, test_data_str, 'POST', context)
+                        if not test_response:
+                            print(f"{COLORS['YELLOW']}⚠ No response{COLORS['RESET']}")
+                            continue
 
-                test_response = self.get_response_fast(url, test_data_str, 'POST', context)
-                if not test_response:
-                    print(f"{COLORS['YELLOW']}⚠ No response{COLORS['RESET']}")
-                    continue
+                        self.total_tests += 1
+                        is_vulnerable, reason = self.analyze_response(original_response, test_response, payload)
 
-                self.total_tests += 1
-                is_vulnerable, reason = self.analyze_response(original_response, test_response, payload)
+                        if is_vulnerable and url not in self.detected_vulnerabilities:
+                            self.vulnerable_tests += 1
+                            self.detected_vulnerabilities.add(url)
+                            print(f"{COLORS['RED']}⚠ VULNERABLE!{COLORS['RESET']}")
+                            print(f"{COLORS['DIM']}      → {reason}{COLORS['RESET']}")
 
-                if is_vulnerable and url not in self.detected_vulnerabilities:
-                    self.vulnerable_tests += 1
-                    self.detected_vulnerabilities.add(url)
-                    print(f"{COLORS['RED']}⚠ VULNERABLE!{COLORS['RESET']}")
-                    print(f"{COLORS['DIM']}      → {reason}{COLORS['RESET']}")
+                            self.vulnerable_found.append({
+                                'url': url,
+                                'payload': payload,
+                                'payload_name': payload_name,
+                                'parameter': input_key,
+                                'reason': reason,
+                            })
+                        else:
+                            print(f"{COLORS['GREEN']}✓ Safe{COLORS['RESET']}")
+            else:
+                payloads_to_test = CRITICAL_XSS_PAYLOADS[:6]
+                for payload, payload_name in payloads_to_test:
+                    modified_data = test_data.copy()
+                    first_key = list(test_data.keys())[0]
+                    modified_data[first_key] = f"{test_data[first_key]}{payload}"
+                    test_data_str = urllib.parse.urlencode(modified_data)
 
-                    self.vulnerable_found.append({
-                        'url': url,
-                        'payload': payload,
-                        'payload_name': payload_name,
-                        'reason': reason,
-                    })
-                else:
-                    print(f"{COLORS['GREEN']}✓ Safe{COLORS['RESET']}")
+                    print(f"{COLORS['GRAY']}   Testing: {COLORS['YELLOW']}{payload_name}{COLORS['RESET']}", end=" ", flush=True)
+
+                    test_response = self.get_response_fast(url, test_data_str, 'POST', context)
+                    if not test_response:
+                        print(f"{COLORS['YELLOW']}⚠ No response{COLORS['RESET']}")
+                        continue
+
+                    self.total_tests += 1
+                    is_vulnerable, reason = self.analyze_response(original_response, test_response, payload)
+
+                    if is_vulnerable and url not in self.detected_vulnerabilities:
+                        self.vulnerable_tests += 1
+                        self.detected_vulnerabilities.add(url)
+                        print(f"{COLORS['RED']}⚠ VULNERABLE!{COLORS['RESET']}")
+                        print(f"{COLORS['DIM']}      → {reason}{COLORS['RESET']}")
+
+                        self.vulnerable_found.append({
+                            'url': url,
+                            'payload': payload,
+                            'payload_name': payload_name,
+                            'reason': reason,
+                        })
+                    else:
+                        print(f"{COLORS['GREEN']}✓ Safe{COLORS['RESET']}")
 
     def print_results(self):
         print(f"\n{COLORS['CYAN']}╔══════════════════════════════════════════════════════════════╗{COLORS['RESET']}")
