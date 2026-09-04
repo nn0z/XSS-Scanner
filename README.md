@@ -25,7 +25,9 @@ An advanced, automated **Cross-Site Scripting (XSS)** vulnerability scanner buil
 ---
    ```
    pip install playwright
-   
+   ```
+   ```
+
    playwright install chromium
    ```
 
