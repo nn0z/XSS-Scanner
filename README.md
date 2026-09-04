@@ -13,7 +13,6 @@ An advanced, automated **Cross-Site Scripting (XSS)** vulnerability scanner buil
 - **Dual Scan Modes:**
   - **Quick Scan:** Fast triage mode targeting top parameters and payloads for rapid assessments.
   - **Deep Scan:** Intensive mode expanding coverage across broader page sets and comprehensive payload banks.
-- **Rich Terminal Interface:** Color-coded status logging and formatted summary dashboards.
 
 ---
 
@@ -24,28 +23,14 @@ An advanced, automated **Cross-Site Scripting (XSS)** vulnerability scanner buil
 
 ### Installation
 ---
-
-1. Install the required Python dependencies:
    ```
    pip install playwright
-   ```
+   
    playwright install chromium
    ```
-
----
-
-### Interactive Menu Options:
-1. **Quick Scan (Default):** Runs a rapid assessment over discovered endpoints using core payload sets.
-2. **Deep Scan:** Executes an exhaustive check covering maximum pages and the full payload bank.
-3. **Exit:** Safely quits the tool.
-
-When prompted, enter your target URL (e.g., `https://example.com`).
-
 
 ---
 
 ## ⚠️ Disclaimer
 
 This tool is created strictly for **educational purposes, authorized security auditing, and bug bounty programs**. Do not scan targets without explicit prior written authorization from the system owners. Unauthorized testing is illegal and unethical.
-
-جارٍ عرض "README.md".
